@@ -1,0 +1,13 @@
+joblib
+numpy==1.17.4
+opencv-python
+Pillow
+PyQt5
+PyQt5-sip
+pyzmq
+scikit-learn==0.22.2.post1
+scipy
+threadpoolctl
+matplotlib
+pygame
+torch
