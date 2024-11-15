@@ -1,5 +1,10 @@
+import os
+from dotenv import load_dotenv
 import subprocess
 import time
+
+# Load environment variables from .env file
+load_dotenv()
 
 def run_command(command):
     return subprocess.Popen(command, shell=True)
