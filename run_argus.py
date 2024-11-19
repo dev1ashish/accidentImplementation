@@ -19,7 +19,6 @@ backend_services = [
 
 # Run client services
 client_services = [
-    "python RunGui.py",
     "python RunCamera.py"
 ]
 
