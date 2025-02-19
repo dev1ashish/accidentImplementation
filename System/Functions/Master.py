@@ -6,11 +6,13 @@ from datetime import datetime
 from System.Controller.JsonEncoder import JsonEncoder
 from System.Data.CONSTANTS import *
 from System.Database.DatabaseConnection import DatabaseConnection
+from System.Notifications.twilio_handler import TwilioHandler
 
 
 class Master:
     def __init__(self):
         self.database = DatabaseConnection()
+        self.twilio_handler = TwilioHandler()
 
 
     def saveFrames(self,camera_id,starting_frame_id,frames,frame_width,frame_height):
@@ -118,13 +120,28 @@ class Master:
         self.database.insertCrashFramesVid(camera_id,starting_frame_id,PRE_FRAMES_NO+1,city,district_no)
         self.sendNotification(camera_id,starting_frame_id,city,district_no)
 
-    def sendNotification(self,camera_id,starting_frame_id,city,district_no):
+    def sendNotification(self, camera_id, starting_frame_id, city, district_no):
         jsonEncoder = JsonEncoder()
-        time =  str(datetime.utcnow().time()).split(".")[0]
+        time = str(datetime.utcnow().time()).split(".")[0]
         date = str(datetime.utcnow().date())
-        date = date+ " "+ time
-        crash_pic = self.getCrashPhoto(camera_id,starting_frame_id)
-        jsonEncoder.sendNotification(camera_id,starting_frame_id,city,district_no,date, crash_pic)
+        date = date + " " + time
+        
+        try:
+            crash_pic = self.getCrashPhoto(camera_id, starting_frame_id)
+        except Exception as e:
+            print(f"Error getting crash photo: {str(e)}")
+            crash_pic = None
+        
+        # Send Twilio notification
+        self.twilio_handler.send_crash_alert(
+            camera_id=camera_id,
+            city=city,
+            district_no=district_no,
+            crash_pic=crash_pic
+        )
+        
+        # Send original notification
+        jsonEncoder.sendNotification(camera_id, starting_frame_id, city, district_no, date, crash_pic)
 
     def executeQuery(self, start_date, end_date, start_time, end_time, city, district):
         dic_of_query = {}
